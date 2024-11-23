@@ -1,0 +1,55 @@
+#!/bin/bash
+# Author: Kat Renault
+# This script processes raw scraped text into structured CSV data.
+# The data is scraped from a webpage or PDF and then cleaned and structured.
+
+# Define input and output files
+INPUT_FILE="raw_data.txt"
+OUTPUT_FILE="structured_data.csv"
+CLEANED_FILE="cleaned_data.txt"
+
+# Echo the start of the script
+echo "Starting data processing..."
+
+# Write CSV header for structured output
+echo "Date, Day, Time, Pred, High/Low" > "$OUTPUT_FILE"
+echo "CSV header written to $OUTPUT_FILE"
+
+# Clean the raw data by removing empty lines and unwanted example lines
+echo "Cleaning raw data..."
+grep -v '^ *$' "$INPUT_FILE" | grep -v '[Ff]or example' > "$CLEANED_FILE"
+echo "Cleaning complete: $CLEANED_FILE generated."
+
+# Show the cleaned data (for verification)
+echo "Displaying cleaned data..."
+cat "$CLEANED_FILE"
+
+# Process each line of the cleaned data
+echo "Processing cleaned data into structured format..."
+
+while IFS= read -r line; do
+  # Echo the raw line before processing (for debugging)
+  echo "Original line: $line"
+  
+  # Example 1: Replace multiple spaces with commas (to create CSV format)
+  processed_line=$(echo "$line" | sed 's/  \+/, /g')
+  echo "After removing extra spaces: $processed_line"
+  
+  # Example 2: Remove underscores at the beginning of numbers
+  processed_line=$(echo "$processed_line" | sed -E 's/_([0-9]+)/\1/g')
+  echo "After removing leading underscores: $processed_line"
+  
+  # Further processing can go here (e.g., extracting specific data)
+  # For now, we just output the processed line to the CSV file
+  echo "$processed_line" >> "$OUTPUT_FILE"
+  
+  # Echo each processed line as it's added to the CSV
+  echo "Processed line added to CSV: $processed_line"
+done < "$CLEANED_FILE"
+
+# Indicate completion of processing
+echo "Data processing complete. Output saved in $OUTPUT_FILE"
+
+# Show the final CSV for verification
+echo "Displaying the final CSV file..."
+cat "$OUTPUT_FILE"
